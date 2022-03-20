@@ -1,7 +1,12 @@
 import pygame
 import random
+import os
+
+pygame.mixer.init()
 
 pygame.init()
+
+
 
 # Colors
 white = (255, 255, 255)
@@ -13,8 +18,13 @@ screen_width = 900
 screen_height = 600
 gameWindow = pygame.display.set_mode((screen_width, screen_height))
 
+#Background Image
+bgimg = pygame.image.load("snake.jpg")
+bgimg = pygame.transform.scale(bgimg, (screen_width, screen_height)).convert_alpha()
+
+
 # Game Title
-pygame.display.set_caption("SnakesWithHarry")
+pygame.display.set_caption("Snakes")
 pygame.display.update()
 clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 55)
@@ -40,6 +50,8 @@ def welcome():
                 exit_game = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
+                    pygame.mixer.music.load('back.mp3')
+                    pygame.mixer.music.play()
                     gameloop()
 
         pygame.display.update()
@@ -57,10 +69,12 @@ def gameloop():
     velocity_y = 0
     snk_list = []
     snk_length = 1
+    # Check if hiscore file exists
+    if(not os.path.exists("hiscore.txt")):
+        with open("hiscore.txt", "w") as f:
+            f.write("0")
 
-     # with open () function is used to read files
-    # if direct text didnt worked then copy path of that file
-    with open("D:\Code\snake game\hiscore.txtt", "r") as f:
+    with open("hiscore.txt", "r") as f:
         hiscore = f.read()
 
     food_x = random.randint(20, screen_width / 2)
@@ -71,7 +85,7 @@ def gameloop():
     fps = 60
     while not exit_game:
         if game_over:
-            with open("D:\Code\snake game\hiscore.txtt", "w") as f:
+            with open("hiscore.txt", "w") as f:
                 f.write(str(hiscore))
             gameWindow.fill(white)
             text_screen("Game Over! Press Enter To Continue", red, 100, 250)
@@ -107,7 +121,6 @@ def gameloop():
                         velocity_y = init_velocity
                         velocity_x = 0
 
-                     # how to create cheats
                     if event.key == pygame.K_q:
                         score +=10
 
@@ -123,6 +136,7 @@ def gameloop():
                     hiscore = score
 
             gameWindow.fill(white)
+            gameWindow.blit(bgimg, (0, 0))
             text_screen("Score: " + str(score) + "  Hiscore: "+str(hiscore), red, 5, 5)
             pygame.draw.rect(gameWindow, red, [food_x, food_y, snake_size, snake_size])
 
@@ -137,9 +151,13 @@ def gameloop():
 
             if head in snk_list[:-1]:
                 game_over = True
+                pygame.mixer.music.load('Gameover.mp3')
+                pygame.mixer.music.play()
 
             if snake_x<0 or snake_x>screen_width or snake_y<0 or snake_y>screen_height:
                 game_over = True
+                pygame.mixer.music.load('Gameover.mp3')
+                pygame.mixer.music.play()
             plot_snake(gameWindow, black, snk_list, snake_size)
         pygame.display.update()
         clock.tick(fps)
